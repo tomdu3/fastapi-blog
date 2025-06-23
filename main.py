@@ -32,10 +32,19 @@ async def about() -> str:
 async def bands() -> list[dict]:
     return BANDS
 
-@app.get("/bands/{band_id}", status_code=206)
+@app.get("/bands/{band_id}")
 async def band(band_id: int) ->  dict:
     logger.info(f"Fetching band with id: {band_id}")
     for band in BANDS:
         if band['id'] == band_id:
             return band
     raise HTTPException(status_code=404, detail=f"Band with id {band_id} not found")
+
+
+@app.get("/bands/genre/{genre}")
+async def bands_by_genre(genre: str) -> list[dict]:
+    logger.info(f"Fetching bands with genre: {genre}")
+    filtered_bands = [band for band in BANDS if band['genre'].lower() == genre.lower()]
+    if not filtered_bands:
+        raise HTTPException(status_code=404, detail=f"No bands found for genre {genre}")
+    return filtered_bands
