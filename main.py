@@ -1,10 +1,17 @@
 from fastapi import FastAPI, HTTPException
 import logging
+from enum import Enum
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 app = FastAPI()
+
+class GenreURLChoices(str, Enum):
+    rock = "rock"
+    grunge = "grunge"
+    alternative = "alternative"
+    progressive_rock = "progressive_rock"
 
 BANDS = [
     {'id': 1, 'name': 'The Beatles', 'genre': 'Rock'},
@@ -42,9 +49,6 @@ async def band(band_id: int) ->  dict:
 
 
 @app.get("/bands/genre/{genre}")
-async def bands_by_genre(genre: str) -> list[dict]:
+async def bands_by_genre(genre: GenreURLChoices) -> list[dict]:
     logger.info(f"Fetching bands with genre: {genre}")
-    filtered_bands = [band for band in BANDS if band['genre'].lower() == genre.lower()]
-    if not filtered_bands:
-        raise HTTPException(status_code=404, detail=f"No bands found for genre {genre}")
-    return filtered_bands
+    return [band for band in BANDS if band['genre'].lower() == genre.value]
