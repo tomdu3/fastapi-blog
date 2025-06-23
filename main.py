@@ -32,7 +32,7 @@ async def about() -> str:
 async def bands() -> list[dict]:
     return BANDS
 
-@app.get("/bands/{band_id}")
+@app.get("/bands/{band_id}", status_code=206)
 async def band(band_id: int) ->  dict:
     logger.info(f"Fetching band with id: {band_id}")
     for band in BANDS:
