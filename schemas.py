@@ -1,5 +1,5 @@
 from enum import Enum
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 
 class GenreURLChoices(str, Enum):
@@ -16,3 +16,8 @@ class Band(BaseModel):
     genre: GenreURLChoices
     
     
+    @field_validator('genre', mode='before')
+    def to_lowercase(cls, v):
+        if isinstance(v, str):
+            return v.lower()
+        return v
