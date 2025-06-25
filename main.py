@@ -34,7 +34,17 @@ async def about() -> str:
 
 
 @app.get("/bands")
-async def bands() -> list[Band]:
+async def bands(
+    genre: GenreURLChoices | None = None,
+    has_albums: bool = False,
+    ) -> list[Band]:
+    if genre:
+        logger.info(f"Fetching bands with genre: {genre}")
+        return [band for band in BANDS if band['genre'].lower() == genre.value]
+    if has_albums:
+        logger.info(f"Fetching bands with albums")
+        return [band for band in BANDS if len(band['albums']) > 0]
+    logger.info(f"Fetching all bands")
     return [
         Band(**band) for band in BANDS
     ]
