@@ -1,17 +1,11 @@
 from fastapi import FastAPI, HTTPException
 import logging
-from enum import Enum
-
+from schemas import GenreURLChoices, Band
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 app = FastAPI()
 
-class GenreURLChoices(str, Enum):
-    rock = "rock"
-    grunge = "grunge"
-    alternative = "alternative"
-    progressive_rock = "progressive_rock"
 
 BANDS = [
     {'id': 1, 'name': 'The Beatles', 'genre': 'Rock'},
@@ -36,8 +30,10 @@ async def about() -> str:
 
 
 @app.get("/bands")
-async def bands() -> list[dict]:
-    return BANDS
+async def bands() -> list[Band]:
+    return [
+        Band(**band) for band in BANDS
+    ]
 
 @app.get("/bands/{band_id}")
 async def band(band_id: int) ->  dict:
