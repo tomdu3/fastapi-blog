@@ -17,7 +17,7 @@ class Band(BaseModel):
     
     
     @field_validator('genre', mode='before')
-    def to_lowercase(cls, v):
+    def to_lowercase_strip(cls, v):
         if isinstance(v, str):
-            return v.lower()
+            return v.lower().strip()
         return v
