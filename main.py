@@ -17,6 +17,7 @@ BANDS = [
     {'id': 7, 'name': 'Queen', 'genre': 'Rock'},
     {'id': 8, 'name': 'The Who', 'genre': 'Rock'},
     {'id': 9, 'name': 'U2', 'genre': 'Rock'},
+    {'id': 10, 'name': 'AC/DC', 'genre': ' Rock'},
 ]
 
 @app.get("/")
@@ -38,10 +39,10 @@ async def bands() -> list[Band]:
 @app.get("/bands/{band_id}")
 async def band(band_id: int) ->  dict:
     logger.info(f"Fetching band with id: {band_id}")
-    for band in BANDS:
-        if band['id'] == band_id:
-            return band
-    raise HTTPException(status_code=404, detail=f"Band with id {band_id} not found")
+    band_found = next((band for band in BANDS if band['id'] == band_id), None)
+    if band_found is None:
+        raise HTTPException(status_code=404, detail="Band not found")
+    return band_found
 
 
 @app.get("/bands/genre/{genre}")
