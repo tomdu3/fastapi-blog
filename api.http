@@ -3,10 +3,45 @@ POST http://localhost:8000/bands
 Content-Type: application/json
 
 {
-  "name": "The Beatles",
-  "genre": "Rock"
+  "name": "Abba",
+  "genre": "Rock",
+  "albums": [
+    {
+      "title": "Waterloo",
+      "release_date": "1974-03-04"
+    },
+    {
+        "title": "Ring Ring",
+        "release_date": "1973-03-26"
+        }
+  ]
 }
 
 ###
+# Post with genre in upper case
+POST http://localhost:8000/bands
+Content-Type: application/json
+
+{
+  "name": "Aqua",
+  "genre": "ROCK",
+  "albums": [
+    {
+      "title": "Barbie Girl",
+      "release_date": "1997-03-04"
+    }
+  ]
+}
+###
 # GET /bands
 GET http://localhost:8000/bands
+
+###
+# GET /bands?genre=rock
+GET http://localhost:8000/bands?genre=rock
+
+###
+# GET bands/{band_id}
+GET http://localhost:8000/bands/11
+
+###

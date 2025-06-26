@@ -20,7 +20,7 @@ BANDS = [
     {'id': 7, 'name': 'Queen', 'genre': 'Rock'},
     {'id': 8, 'name': 'The Who', 'genre': 'Rock'},
     {'id': 9, 'name': 'U2', 'genre': 'Rock'},
-    {'id': 10, 'name': 'AC/DC', 'genre': ' Rock'},
+    {'id': 10, 'name': 'AC/DC', 'genre': 'Rock'},
 ]
 
 @app.get("/")
@@ -38,12 +38,14 @@ async def bands(
     genre: GenreURLChoices | None = None,
     has_albums: bool = False,
     ) -> list[BandWithID]:
+    band_list = [BandWithID(**band) for band in BANDS]
     if genre:
         logger.info(f"Fetching bands with genre: {genre}")
-        return [band for band in BANDS if band['genre'].lower() == genre.value]
+        return [
+            band for band in band_list if band.genre.value.lower() == genre.value]
     if has_albums:
         logger.info(f"Fetching bands with albums")
-        return [band for band in BANDS if len(band['albums']) > 0]
+        return [band for band in band_list if len(band['albums']) > 0]
     logger.info(f"Fetching all bands")
     return [
         BandWithID(**band) for band in BANDS

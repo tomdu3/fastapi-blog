@@ -8,6 +8,11 @@ class GenreURLChoices(str, Enum):
     alternative = "alternative"
     progressive_rock = "progressive rock"
 
+class GenreChoices(str, Enum):
+    rock = "Rock"
+    grunge = "Grunge"
+    alternative = "Alternative"
+    progressive_rock = "Progressive Rock"
 
 class Album(BaseModel):
     title: str
@@ -16,19 +21,15 @@ class Album(BaseModel):
 
 class BandBase(BaseModel):
     name: str
-    genre: GenreURLChoices
+    genre: GenreChoices
     albums: list[Album] = []
-    
-    
-    @field_validator('genre', mode='before')
-    def to_lowercase_strip(cls, v):
-        if isinstance(v, str):
-            return v.lower().strip()
-        return v
 
 class BandCreate(BandBase):
-    pass
+    # Title case the genre and strip whitespace
+    @field_validator('genre', mode='before')
+    def title_case_genre(cls, v):
+        if isinstance(v, str):
+            return v.title().strip()
 
 class BandWithID(BandBase):
     id: int
-    pass
