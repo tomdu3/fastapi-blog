@@ -14,9 +14,7 @@ class Album(BaseModel):
     release_date: date
 
 
-class Band(BaseModel):
-    # {'id': 1, 'name': 'The Beatles', 'genre': 'Rock'},
-    id: int
+class BandBase(BaseModel):
     name: str
     genre: GenreURLChoices
     albums: list[Album] = []
@@ -27,3 +25,10 @@ class Band(BaseModel):
         if isinstance(v, str):
             return v.lower().strip()
         return v
+
+class BandCreate(BandBase):
+    pass
+
+class BandWithID(BandBase):
+    id: int
+    pass

@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 import logging
-from schemas import GenreURLChoices, Band
+from schemas import GenreURLChoices, BandBase, BandCreate, BandWithID
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
@@ -37,7 +37,7 @@ async def about() -> str:
 async def bands(
     genre: GenreURLChoices | None = None,
     has_albums: bool = False,
-    ) -> list[Band]:
+    ) -> list[BandWithID]:
     if genre:
         logger.info(f"Fetching bands with genre: {genre}")
         return [band for band in BANDS if band['genre'].lower() == genre.value]
@@ -46,13 +46,13 @@ async def bands(
         return [band for band in BANDS if len(band['albums']) > 0]
     logger.info(f"Fetching all bands")
     return [
-        Band(**band) for band in BANDS
+        BandWithID(**band) for band in BANDS
     ]
 
 @app.get("/bands/{band_id}")
-async def band(band_id: int) ->  Band:
+async def band(band_id: int) ->  BandWithID:
     logger.info(f"Fetching band with id: {band_id}")
-    band_found = next((Band(**band) for band in BANDS if band['id'] == band_id), None)
+    band_found = next((BandWithID(**band) for band in BANDS if band['id'] == band_id), None)
     if band_found is None:
         raise HTTPException(status_code=404, detail="Band not found")
     return band_found
@@ -62,3 +62,12 @@ async def band(band_id: int) ->  Band:
 async def bands_by_genre(genre: GenreURLChoices) -> list[dict]:
     logger.info(f"Fetching bands with genre: {genre}")
     return [band for band in BANDS if band['genre'].lower() == genre.value]
+
+@app.post("/bands")
+async def create_band(band_data: BandCreate) -> BandWithID:
+    logger.info(f"Creating band: {band_data}")
+    id = BANDS[-1]['id'] + 1
+    band = BandWithID(id=id, **band_data.model_dump()).model_dump()
+    BANDS.append(band)
+    return band
+    
