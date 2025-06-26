@@ -1,0 +1,12 @@
+# POST /bands
+POST http://localhost:8000/bands
+Content-Type: application/json
+
+{
+  "name": "The Beatles",
+  "genre": "Rock"
+}
+
+###
+# GET /bands
+GET http://localhost:8000/bands
