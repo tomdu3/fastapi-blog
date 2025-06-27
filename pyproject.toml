@@ -1,7 +1,7 @@
 [project]
-name = "fastapi-blog"
+name = "fastapi-test"
 version = "0.1.0"
-description = "Add your description here"
+description = "FastAPI Learning Repo"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
