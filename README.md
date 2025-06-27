@@ -1,6 +1,6 @@
-# FastAPI Blog
+# FastAPI Test
 
-A simple blog application built with FastAPI.
+FastAPI Learning Repo.
 
 ## Docker
 
@@ -25,3 +25,4 @@ FastAPI project documentation is self generated from the source code. It can be 
 
 1. <http://localhost:8000/docs> - [Swagger UI](https://swagger.io/tools/swagger-ui/) format
 2. <http://localhost:8000/redoc> - [ReDoc format](https://github.com/Redocly/redoc)
+3. [FastAPI - Complete Course for Python API Development](https://www.youtube.com/playlist?list=PL-2EBeDYMIbQghmnb865lpdmYyWU3I5F1)
