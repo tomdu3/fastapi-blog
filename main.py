@@ -1,4 +1,5 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Path, Query
+from typing import Annotated
 import logging
 from schemas import GenreURLChoices, BandBase, BandCreate, BandWithID
 logger = logging.getLogger(__name__)
@@ -36,25 +37,46 @@ async def about() -> str:
 @app.get("/bands")
 async def bands(
     genre: GenreURLChoices | None = None,
-    has_albums: bool = False,
-    ) -> list[BandWithID]:
+    q: Annotated[
+        str | None,
+        Query(max_length=10)
+    ] = None
+) -> list[BandWithID]:
     band_list = [BandWithID(**band) for band in BANDS]
+
+    filtered = False # Add a flag to track if any filtering happened
+
     if genre:
         logger.info(f"Fetching bands with genre: {genre}")
-        return [
-            band for band in band_list if band.genre.value.lower() == genre.value]
-    if has_albums:
-        logger.info(f"Fetching bands with albums")
-        return [band for band in band_list if len(band['albums']) > 0]
-    logger.info(f"Fetching all bands")
-    return [
-        BandWithID(**band) for band in BANDS
-    ]
+        band_list = [
+            band for band in band_list if band.genre.value.lower() == genre.value
+        ]
+        filtered = True
+
+    if q:
+        logger.info(f"Fetching bands with query: {q}")
+        band_list = [
+            band for band in band_list if q.lower() in band.name.lower()
+        ]
+        filtered = True
+
+    if not filtered: # Log "Fetching all bands" only if no filtering occurred
+        logger.info(f"Fetching all bands")
+
+    return band_list
+
 
 @app.get("/bands/{band_id}")
-async def band(band_id: int) ->  BandWithID:
+async def band(
+    band_id: Annotated[
+        int,
+        Path(title='The band ID')  # add Annotated title for documentation
+        ]) ->  BandWithID:
     logger.info(f"Fetching band with id: {band_id}")
-    band_found = next((BandWithID(**band) for band in BANDS if band['id'] == band_id), None)
+    band_found = next(
+        (BandWithID(**band) for band in BANDS if band['id'] == band_id),
+        None
+        )
     if band_found is None:
         raise HTTPException(status_code=404, detail="Band not found")
     return band_found
