@@ -61,7 +61,7 @@ wheels = [
 ]
 
 [[package]]
-name = "fastapi-blog"
+name = "fastapi-test"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

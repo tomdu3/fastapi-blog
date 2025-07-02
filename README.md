@@ -7,13 +7,13 @@ FastAPI Learning Repo.
 To build the Docker image, run the following command:
 
 ```bash
-docker build -t fastapi-blog .
+docker build -t fastapi-test .
 ```
 
 To run the Docker image, run the following command:
 
 ```bash
-docker run -p 8000:8000 fastapi-blog
+docker run -p 8000:8000 fastapi-test
 ```
 
 You can then access the application at <http://localhost:8000>.
