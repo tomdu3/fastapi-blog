@@ -44,21 +44,21 @@ BANDS = [
 # async def about() -> str:
 #     return "Nothing to see here"
 
-@app.get("/bands")
-async def bands(
-    genre: GenreURLChoices | None = None,
-    q: Annotated[
-        str | None,
-        Query(max_length=10)
-    ] = None,
-    session: Session = Depends(get_session)
-) -> list[Band]:
-    query = select(Band)
-    if genre:
-        query = query.where(Band.genre == genre.value)
-    if q:
-        query = query.where(Band.name.contains(q))
-    return session.exec(query).all()
+# @app.get("/bands")
+# async def bands(
+#     genre: GenreURLChoices | None = None,
+#     q: Annotated[
+#         str | None,
+#         Query(max_length=10)
+#     ] = None,
+#     session: Session = Depends(get_session)
+# ) -> list[Band]:
+#     query = select(Band)
+#     if genre:
+#         query = query.where(Band.genre == genre.value)
+#     if q:
+#         query = query.where(Band.name.contains(q))
+#     return session.exec(query).all()
 
 
 # @app.get("/bands")
