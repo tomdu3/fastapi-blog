@@ -1,11 +1,22 @@
-from fastapi import FastAPI, HTTPException, Path, Query
+from fastapi import FastAPI, HTTPException, Path, Query, Depends
+from models import GenreURLChoices, BandCreate, Band, Album
 from typing import Annotated
+from sqlmodel import Session
 import logging
-from schemas import GenreURLChoices, BandBase, BandCreate, BandWithID
+from contextlib import asynccontextmanager
+from db import init_db, get_session
+
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
+
+app = FastAPI(lifespan=lifespan)
 
 
 BANDS = [
@@ -24,15 +35,14 @@ BANDS = [
     {'id': 10, 'name': 'AC/DC', 'genre': 'Rock'},
 ]
 
-@app.get("/")
-async def index() -> dict[str, str]:
-    return {"message": "Hello World"}
+# @app.get("/")
+# async def index() -> dict[str, str]:
+#     return {"message": "Hello World"}
 
 
-@app.get("/about")
-async def about() -> str:
-    return "Nothing to see here"
-
+# @app.get("/about")
+# async def about() -> str:
+#     return "Nothing to see here"
 
 @app.get("/bands")
 async def bands(
@@ -40,58 +50,89 @@ async def bands(
     q: Annotated[
         str | None,
         Query(max_length=10)
-    ] = None
-) -> list[BandWithID]:
-    band_list = [BandWithID(**band) for band in BANDS]
-
-    filtered = False # Add a flag to track if any filtering happened
-
+    ] = None,
+    session: Session = Depends(get_session)
+) -> list[Band]:
+    query = select(Band)
     if genre:
-        logger.info(f"Fetching bands with genre: {genre}")
-        band_list = [
-            band for band in band_list if band.genre.value.lower() == genre.value
-        ]
-        filtered = True
-
+        query = query.where(Band.genre == genre.value)
     if q:
-        logger.info(f"Fetching bands with query: {q}")
-        band_list = [
-            band for band in band_list if q.lower() in band.name.lower()
-        ]
-        filtered = True
-
-    if not filtered: # Log "Fetching all bands" only if no filtering occurred
-        logger.info(f"Fetching all bands")
-
-    return band_list
+        query = query.where(Band.name.contains(q))
+    return session.exec(query).all()
 
 
-@app.get("/bands/{band_id}")
-async def band(
-    band_id: Annotated[
-        int,
-        Path(title='The band ID')  # add Annotated title for documentation
-        ]) ->  BandWithID:
-    logger.info(f"Fetching band with id: {band_id}")
-    band_found = next(
-        (BandWithID(**band) for band in BANDS if band['id'] == band_id),
-        None
-        )
-    if band_found is None:
-        raise HTTPException(status_code=404, detail="Band not found")
-    return band_found
+# @app.get("/bands")
+# async def bands(
+#     genre: GenreURLChoices | None = None,
+#     q: Annotated[
+#         str | None,
+#         Query(max_length=10)
+#     ] = None
+# ) -> list[BandWithID]:
+#     band_list = [BandWithID(**band) for band in BANDS]
+
+#     filtered = False # Add a flag to track if any filtering happened
+
+#     if genre:
+#         logger.info(f"Fetching bands with genre: {genre}")
+#         band_list = [
+#             band for band in band_list if band.genre.value.lower() == genre.value
+#         ]
+#         filtered = True
+
+#     if q:
+#         logger.info(f"Fetching bands with query: {q}")
+#         band_list = [
+#             band for band in band_list if q.lower() in band.name.lower()
+#         ]
+#         filtered = True
+
+#     if not filtered: # Log "Fetching all bands" only if no filtering occurred
+#         logger.info(f"Fetching all bands")
+
+#     return band_list
 
 
-@app.get("/bands/genre/{genre}")
-async def bands_by_genre(genre: GenreURLChoices) -> list[dict]:
-    logger.info(f"Fetching bands with genre: {genre}")
-    return [band for band in BANDS if band['genre'].lower() == genre.value]
+# @app.get("/bands/{band_id}")
+# async def band(
+#     band_id: Annotated[
+#         int,
+#         Path(title='The band ID')  # add Annotated title for documentation
+#         ]) ->  BandWithID:
+#     logger.info(f"Fetching band with id: {band_id}")
+#     band_found = next(
+#         (BandWithID(**band) for band in BANDS if band['id'] == band_id),
+#         None
+#         )
+#     if band_found is None:
+#         raise HTTPException(status_code=404, detail="Band not found")
+#     return band_found
+
+
+# @app.get("/bands/genre/{genre}")
+# async def bands_by_genre(genre: GenreURLChoices) -> list[dict]:
+#     logger.info(f"Fetching bands with genre: {genre}")
+#     return [band for band in BANDS if band['genre'].lower() == genre.value]
 
 @app.post("/bands")
-async def create_band(band_data: BandCreate) -> BandWithID:
+async def create_band(
+    band_data: BandCreate,
+    session: Session = Depends(get_session)
+) -> Band:
     logger.info(f"Creating band: {band_data}")
-    id = BANDS[-1]['id'] + 1
-    band = BandWithID(id=id, **band_data.model_dump()).model_dump()
-    BANDS.append(band)
+    band = Band(name=band_data.name, genre=band_data.genre)
+    session.add(band)
+    
+    if band_data.albums:
+        for album in band_data.albums:
+            album_obj = Album(
+                title = album.title,
+                release_date = album.release_date,
+                band = band
+            )
+            session.add(album_obj)
+    
+    session.commit()
+    session.refresh(band)
     return band
     
