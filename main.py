@@ -3,21 +3,22 @@ from models import GenreURLChoices, BandCreate, Band, Album
 from typing import Annotated
 from sqlmodel import Session, select
 import logging
-from contextlib import asynccontextmanager
+# from contextlib import asynccontextmanager  # not needed anymore
 from db import init_db, get_session
 
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
+# # not needed because of alembic implementation
+# @asynccontextmanager
+# async def lifespan(app: FastAPI):
+#     init_db()
+#     yield
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    init_db()
-    yield
+# app = FastAPI(lifespan=lifespan)
 
-app = FastAPI(lifespan=lifespan)
-
+app = FastAPI()
 
 BANDS = [
     {'id': 1, 'name': 'The Beatles', 'genre': 'Rock'},
