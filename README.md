@@ -18,6 +18,32 @@ docker run -p 8000:8000 fastapi-test
 
 You can then access the application at <http://localhost:8000>.
 
+
+## Alembic
+
+- To initialize alembic:
+```sh
+alembic init <migrations-name>
+```
+
+- to make migrations
+```sh
+alembic revision --autogenerate -m "message"
+```
+
+- to apply migrations
+```sh
+alembic upgrade head # for the most recent file generated 
+```
+
+## Fixtures
+
+For the initial data population there's `fixtures.py` file. After database initialization, run
+
+```sh
+uv run fixtures.py
+```
+
 ## FastAPI documentation
 
 - [Official FastAPI documentation](https://fastapi.tiangolo.com/)
