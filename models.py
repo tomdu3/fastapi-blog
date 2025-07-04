@@ -1,5 +1,5 @@
 from enum import Enum
-from pydantic import BaseModel, field_validator
+from pydantic import field_validator
 from sqlmodel import SQLModel, Field, Relationship
 from datetime import date
 
